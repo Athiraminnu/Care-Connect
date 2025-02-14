@@ -40,17 +40,25 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third-party apps
     'rest_framework',  # Add this for DRF
+    'corsheaders',  # Allow frontend to connect (install it with pip install django-cors-headers)
 ]
 AUTH_USER_MODEL = 'appointment_pass.UserDetails'  # Custom user model
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Make sure CORS middleware is included if needed
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',  # This is required for Django Admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains to access the API
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React frontend
+    "http://127.0.0.1:3000",
 ]
 
 ROOT_URLCONF = 'appointment.urls'
