@@ -69,3 +69,7 @@ def UserLogin(request):
 def UserLogout(request):
     logout(request)
     return redirect('/', status=status.HTTP_200_OK)
+
+
+
+

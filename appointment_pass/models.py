@@ -19,3 +19,16 @@ class UserDetails(AbstractUser):
         related_name="userdetails_permissions",  # Unique related_name to prevent conflict
         blank=True
     )
+
+
+class AppointmentDetails(models.Model):
+    bookingId = models.OneToOneField(
+        UserDetails,  # Reference the UserDetails model
+        on_delete=models.CASCADE,  # Deletes appointment if the user is deleted
+        primary_key=True  # This makes bookingId the primary key
+    )
+    date = models.DateField(max_length=10, blank=False, null=False)
+    time = models.TimeField(null=False, blank=False, unique=True)
+
+    def __str__(self):
+        return f"Appointment of {self.bookingId.username}"
