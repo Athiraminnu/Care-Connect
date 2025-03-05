@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+
+from .models import AppointmentDetails
 from .serializer import RegisterSerializer
 from django.http import JsonResponse
 
@@ -72,4 +74,11 @@ def UserLogout(request):
 
 
 
-
+@api_view(['GET'])
+def booking(request, id):
+    bookingRecord = get_object_or_404(AppointmentDetails, bookingId=id)
+    booking_data = {
+        "bookingId": bookingRecord.bookingId.id,  # Assuming bookingId is a ForeignKey
+        # Add other fields if needed
+    }
+    return Response(booking_data)
