@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+from appointment_pass.models import AppointmentDetails
+
 User = get_user_model()
 
 
@@ -22,3 +24,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+
+
+class AppointmentDetailsSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = AppointmentDetails
+        fields = '__all__'

@@ -6,6 +6,7 @@ urlpatterns = [
     path('user_register/', views.user_register, name='register'),  # Corrected: Removed '/'
     path('login', views.UserLogin, name='login'),
     path('logout', views.UserLogout, name='logout'),
-    path('booking/<int:id>', views.booking, name='booking'),
+    path('bookings', views.booking, name='booking'),
+    path('book/<int:id>', views.bookSlot, name='bookSlot'),
 
 ]

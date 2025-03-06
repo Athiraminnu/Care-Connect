@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import AppointmentDetails
-from .serializer import RegisterSerializer
+from .serializer import RegisterSerializer, AppointmentDetailsSerializers
 from django.http import JsonResponse
 
 
@@ -75,10 +75,36 @@ def UserLogout(request):
 
 
 @api_view(['GET'])
-def booking(request, id):
-    bookingRecord = get_object_or_404(AppointmentDetails, bookingId=id)
-    booking_data = {
-        "bookingId": bookingRecord.bookingId.id,  # Assuming bookingId is a ForeignKey
-        # Add other fields if needed
-    }
-    return Response(booking_data)
+def booking(request):
+    booking_records = AppointmentDetails.objects.all()  # Get all records
+    serializer = AppointmentDetailsSerializers(booking_records, many=True)  # Serialize multiple records
+    return Response(serializer.data)
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import AppointmentDetails
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import AppointmentDetails
+
+@api_view(['POST'])
+def bookSlot(request, id):
+    try:
+        slot = request.data.get('time')  # Example: "4.30PM"
+
+        # Convert "4.30PM" to "16:30" format
+        slot_time = datetime.strptime(slot, "%I.%M%p").strftime("%H:%M")
+
+        # Check if the slot is already booked
+        if AppointmentDetails.objects.filter(time=slot_time, bookingId=id).exists():
+            return Response({'error': 'This time slot is already booked!'}, status=400)
+
+        # Create database entry
+        AppointmentDetails.objects.create(time=slot_time, bookingId=id)
+
+        return Response({'message': 'Slot booking successful'})
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
