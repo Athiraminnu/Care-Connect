@@ -1,13 +1,14 @@
+from datetime import datetime
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from rest_framework import status
-
-from .models import AppointmentDetails
 from .serializer import RegisterSerializer, AppointmentDetailsSerializers
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import AppointmentDetails
+from datetime import datetime
 
 
 User = get_user_model()
@@ -81,30 +82,28 @@ def booking(request):
     return Response(serializer.data)
 
 
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import AppointmentDetails
 
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from .models import AppointmentDetails
 
 @api_view(['POST'])
-def bookSlot(request, id):
-    try:
-        slot = request.data.get('time')  # Example: "4.30PM"
+def bookSlot(request):
+    slot = request.data.get('value')  # Example: "4.30PM"
+    name = request.data.get('userName')  # Get user ID from request
+    date = request.data.get('dateOfApp')
 
+    if not slot:
+        return Response({'error': 'No time slot provided!'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
         # Convert "4.30PM" to "16:30" format
         slot_time = datetime.strptime(slot, "%I.%M%p").strftime("%H:%M")
+    except ValueError:
+        return Response({'error': 'Invalid time format!'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the slot is already booked
-        if AppointmentDetails.objects.filter(time=slot_time, bookingId=id).exists():
-            return Response({'error': 'This time slot is already booked!'}, status=400)
+    # Check if the slot is already booked
+    if AppointmentDetails.objects.filter(time=slot_time).exists():
+        return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Create database entry
-        AppointmentDetails.objects.create(time=slot_time, bookingId=id)
+    # Create database entry with user ID
+    AppointmentDetails.objects.create(time=slot_time, user=name, date=date)
 
-        return Response({'message': 'Slot booking successful'})
-    except Exception as e:
-        return Response({'error': str(e)}, status=500)
+    return Response({'message': 'Slot booking successful'}, status=status.HTTP_200_OK)

@@ -1,3 +1,5 @@
+from datetime import timezone
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, Permission, Group
 from django.db import models
 
@@ -22,13 +24,9 @@ class UserDetails(AbstractUser):
 
 
 class AppointmentDetails(models.Model):
-    bookingId = models.OneToOneField(
-        UserDetails,  # Reference the UserDetails model
-        on_delete=models.CASCADE,  # Deletes appointment if the user is deleted
-        primary_key=True  # This makes bookingId the primary key
-    )
-    date = models.DateField(max_length=10, blank=False, null=False)
-    time = models.TimeField(null=False, blank=False, unique=True)
+    date = models.DateField(default=timezone.now)  # Uses the current date
+    time = models.TimeField(unique=True, default="12:00:00")  # Uses a valid default time
+    name = models.CharField(max_length=200, default="Unknown")  # Provide a sensible default
 
     def __str__(self):
-        return f"Appointment of {self.bookingId.username}"
+        return f"Appointment of {self.name}"
