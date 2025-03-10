@@ -85,3 +85,19 @@ def bookSlot(request):
     # Create database entry with user ID
     AppointmentDetails.objects.create(time=slot, name=name, date=date)
     return Response({'message': 'Slot booking successful'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def appointments(request):
+    if request.method == 'GET':  # Fetch Appointments
+        allAppointments = AppointmentDetails.objects.all()  # Return all if no date filter
+        serializer = AppointmentDetailsSerializers(allAppointments, many=True)
+        date = request.GET.get('date', None)  # Get the date from query params
+        if date:
+            try: # Validate and format date
+                formatted_date = datetime.strptime(date, "%Y-%m-%d").date()  # Ensure YYYY-MM-DD format
+                allAppointments = AppointmentDetails.objects.filter(date=formatted_date)
+                serializer = AppointmentDetailsSerializers(allAppointments, many=True)
+            except ValueError:
+                return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+        return Response(serializer.data)
