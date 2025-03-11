@@ -78,10 +78,9 @@ def bookSlot(request):
     date = request.data.get('dateOfApp')
     if not slot:
         return Response({'error': 'No time slot provided!'}, status=status.HTTP_400_BAD_REQUEST)
-    # Check if the slot is already booked
-    if AppointmentDetails.objects.get.all(date=date):
-        if AppointmentDetails.objects.filter(time=slot).exists():
-            return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
+    # Check if the slot is already booked for the given date
+    if AppointmentDetails.objects.filter(date=date, time=slot).exists():
+        return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
     # Create database entry with user ID
     AppointmentDetails.objects.create(time=slot, name=name, date=date)
     return Response({'message': 'Slot booking successful'}, status=status.HTTP_200_OK)
@@ -90,14 +89,17 @@ def bookSlot(request):
 @api_view(['GET'])
 def appointments(request):
     if request.method == 'GET':  # Fetch Appointments
-        allAppointments = AppointmentDetails.objects.all()  # Return all if no date filter
-        serializer = AppointmentDetailsSerializers(allAppointments, many=True)
         date = request.GET.get('date', None)  # Get the date from query params
         if date:
             try: # Validate and format date
                 formatted_date = datetime.strptime(date, "%Y-%m-%d").date()  # Ensure YYYY-MM-DD format
                 allAppointments = AppointmentDetails.objects.filter(date=formatted_date)
-                serializer = AppointmentDetailsSerializers(allAppointments, many=True)
             except ValueError:
                 return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+        else:
+            allAppointments = AppointmentDetails.objects.all()  # Return all if no date filter
+        if allAppointments:
+            serializer = AppointmentDetailsSerializers(allAppointments, many=True)
+        else:
+            return Response({'msg': 'No Data Found !'})
         return Response(serializer.data)
