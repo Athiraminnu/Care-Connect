@@ -46,14 +46,17 @@ def user_register(request):
 
 @api_view(['POST'])
 def UserLogin(request):
+    print("Request Data:", request.data)  # Debugging line
     userName = request.data.get('username')
     password = request.data.get('password')
+
     if not userName or not password:
-        return Response({"error": "username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Username and password are required"}, status=status.HTTP_400_BAD_REQUEST)
+
     user = authenticate(username=userName, password=password)
     if user is not None:
         login(request, user)
-        return redirect('/', status=status.HTTP_200_OK)
+        return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Invalid username or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -61,8 +64,7 @@ def UserLogin(request):
 @api_view(['POST'])
 def UserLogout(request):
     logout(request)
-    return redirect('/', status=status.HTTP_200_OK)
-
+    return Response({'message': 'Logged out successfully'}, status=200)
 
 @api_view(['GET'])
 def booking(request): #to display all the bookings of a user/ a perticular day
