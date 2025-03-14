@@ -105,3 +105,16 @@ def appointments(request):
         else:
             return Response({'msg': 'No Data Found !'})
         return Response(serializer.data)
+
+
+@api_view(['GET'])
+def myAppointments(request):
+    if request.method == 'GET':
+        username = request.headers.get('UserInfo')
+        if not username:
+            return Response({"message": "No user Found!"}, status=404)
+        appointments = AppointmentDetails.objects.filter(name=username)
+        if not appointments.exists():
+            return Response({"message": "No Appointments Found!"}, status=404)
+        serialized_data = AppointmentDetailsSerializers(appointments, many=True).data
+        return Response(serialized_data, status=200)

@@ -9,12 +9,12 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
 from pathlib import Path
+
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,9 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'appointment_pass',
     'django.contrib.admin',
@@ -38,12 +36,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party apps
+    # Third-party apps.
     'rest_framework',  # Add this for DRF
     'corsheaders',  # Allow frontend to connect (install it with pip install django-cors-headers)
 ]
 AUTH_USER_MODEL = 'appointment_pass.UserDetails'  # Custom user model
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,12 +51,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',  # This is required for Django Admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all domains to access the API
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all frontend requests
+CORS_ALLOW_HEADERS = ["*"]  # Allow all headers
+CORS_ALLOW_METHODS = ["*"]  # Allow all methods
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend
-    "http://127.0.0.1:3000",
 ]
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "content-type",
+    "authorization",
+    "UserInfo",  # Allow custom headers
+]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 
 ROOT_URLCONF = 'appointment.urls'
 
