@@ -111,8 +111,6 @@ def appointments(request):
 def myAppointments(request):
     if request.method == 'GET':
         username = request.headers.get('UserInfo')
-        if not username:
-            return Response({"message": "No user Found!"}, status=404)
         appointments = AppointmentDetails.objects.filter(name=username)
         if not appointments.exists():
             return Response({"message": "No Appointments Found!"}, status=404)
