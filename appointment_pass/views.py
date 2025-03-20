@@ -78,10 +78,13 @@ def bookSlot(request):
     slot = request.data.get('value')  # Example: "4.30PM"
     name = request.data.get('userName')  # Get user ID from request
     date = request.data.get('dateOfApp')
-    if not slot:
-        return Response({'error': 'No time slot provided!'}, status=status.HTTP_400_BAD_REQUEST)
+    if not slot or not date:  # Ensure both fields are provided
+        return Response({'error': "Missing time or date"}, status=status.HTTP_400_BAD_REQUEST)
+    # if not slot:
+    #     return Response({'error': 'No time slot provided!'}, status=status.HTTP_400_BAD_REQUEST)
     # Check if the slot is already booked for the given date
-    if AppointmentDetails.objects.filter(date=date, time=slot).exists():
+    appointment = AppointmentDetails.objects.filter(date=date, time=slot)
+    if appointment.exists():
         return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
     # Create database entry with user ID
     AppointmentDetails.objects.create(time=slot, name=name, date=date)
@@ -90,16 +93,16 @@ def bookSlot(request):
 
 @api_view(['GET'])
 def appointments(request):
-    if request.method == 'GET':  # Fetch Appointments
-        date = request.GET.get('date', None)  # Get the date from query params
+    if request.method == 'GET':
+        date = request.GET.get('date', None)
         if date:
-            try: # Validate and format date
+            try:
                 formatted_date = datetime.strptime(date, "%Y-%m-%d").date()  # Ensure YYYY-MM-DD format
                 allAppointments = AppointmentDetails.objects.filter(date=formatted_date)
             except ValueError:
                 return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
         else:
-            allAppointments = AppointmentDetails.objects.all()  # Return all if no date filter
+            allAppointments = AppointmentDetails.objects.all()
         if allAppointments:
             serializer = AppointmentDetailsSerializers(allAppointments, many=True)
         else:

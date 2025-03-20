@@ -24,7 +24,7 @@ class UserDetails(AbstractUser):
 
 class AppointmentDetails(models.Model):
     date = models.DateField(default=timezone.now)  # Uses the current date
-    time = models.CharField(unique=True, default="12:00 AM", max_length=10)  # Uses a valid default time
+    time = models.CharField(default="12:00 AM", max_length=10)  # Uses a valid default time
     name = models.CharField(max_length=200, default="Unknown")  # Provide a sensible default
 
     def __str__(self):
