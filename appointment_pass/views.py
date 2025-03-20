@@ -116,3 +116,17 @@ def myAppointments(request):
             return Response({"message": "No Appointments Found!"}, status=404)
         serialized_data = AppointmentDetailsSerializers(appointments, many=True).data
         return Response(serialized_data, status=200)
+
+
+@api_view(['POST'])
+def cancelMyAppointment(request):
+    time = request.data.get('cancelTime')
+    date = request.data.get('cancelDate')
+    if not time or not date:  # Ensure both fields are provided
+        return Response({'error': "Missing cancelTime or cancelDate"}, status=400)
+    deleteAppointment = AppointmentDetails.objects.filter(date=date, time=time)
+    if deleteAppointment.exists():
+        deleteAppointment.delete()
+        return Response({'message' : "Appointment cancelled sucessfully !"}, status=200)
+    else:
+        return Response({"message": "No matching Appointment found !!"}, status=404)

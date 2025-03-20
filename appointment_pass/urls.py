@@ -10,4 +10,5 @@ urlpatterns = [
     path('book/', views.bookSlot, name='bookSlot'),
     path('viewappointments/', views.appointments, name='viewappointments'),
     path('myappointments/', views.myAppointments, name='viewmyappointments'),
+    path('cancel/', views.cancelMyAppointment, name='cancelmyappointment'),
 ]
