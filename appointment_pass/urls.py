@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout', views.UserLogout, name='logout'),
     path('bookings', views.booking, name='booking'),
     path('book/', views.bookSlot, name='bookSlot'),
+    # path('booked-Slots/', views.bookedSlot, name='bookedSlot'),
     path('viewappointments/', views.appointments, name='viewappointments'),
     path('myappointments/', views.myAppointments, name='viewmyappointments'),
     path('cancel/', views.cancelMyAppointment, name='cancelmyappointment'),

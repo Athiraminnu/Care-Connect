@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
-from django.shortcuts import redirect, get_object_or_404
 from rest_framework import status
 from .serializer import RegisterSerializer, AppointmentDetailsSerializers
 from django.http import JsonResponse
@@ -32,7 +31,7 @@ def user_register(request):
     phone = data["phone"]
     email = data["email"]
     password = data["password"]
-    # Check if the username or email already exists
+
     if User.objects.filter(username=username).exists():
         return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
     if User.objects.filter(email=email).exists():
@@ -67,28 +66,39 @@ def UserLogout(request):
     return Response({'message': 'Logged out successfully'}, status=200)
 
 @api_view(['GET'])
-def booking(request): #to display all the bookings of a user/ a perticular day
-    booking_records = AppointmentDetails.objects.all()  # Get all records
-    serializer = AppointmentDetailsSerializers(booking_records, many=True)  # Serialize multiple records
+def booking(request):
+    booking_records = AppointmentDetails.objects.all()
+    serializer = AppointmentDetailsSerializers(booking_records, many=True)
     return Response(serializer.data)
 
 
-@api_view(['POST'])
+@api_view(['POST', 'GET'])  # Ensure GET is included
 def bookSlot(request):
-    slot = request.data.get('value')  # Example: "4.30PM"
-    name = request.data.get('userName')  # Get user ID from request
-    date = request.data.get('dateOfApp')
-    if not slot or not date:  # Ensure both fields are provided
-        return Response({'error': "Missing time or date"}, status=status.HTTP_400_BAD_REQUEST)
-    # if not slot:
-    #     return Response({'error': 'No time slot provided!'}, status=status.HTTP_400_BAD_REQUEST)
-    # Check if the slot is already booked for the given date
-    appointment = AppointmentDetails.objects.filter(date=date, time=slot)
-    if appointment.exists():
-        return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
-    # Create database entry with user ID
-    AppointmentDetails.objects.create(time=slot, name=name, date=date)
-    return Response({'message': 'Slot booking successful'}, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        date = request.GET.get('dateOfApp')
+        if not date:
+            return Response({"error": "Date parameter is required"}, status=400)
+
+        booked_slots = AppointmentDetails.objects.filter(date=date)
+        serializer = AppointmentDetailsSerializers(booked_slots, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'POST':
+        slot = request.data.get('value')
+        name = request.data.get('userName')
+        date = request.data.get('dateOfApp')
+
+        if not slot or not date:
+            return Response({'error': "Missing time or date"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if AppointmentDetails.objects.filter(date=date, time=slot).exists():
+            return Response({'error': 'This time slot is already booked!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create appointment
+        AppointmentDetails.objects.create(time=slot, name=name, date=date)
+
+        return Response({'message': 'Slot booking successful'}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -125,7 +135,7 @@ def myAppointments(request):
 def cancelMyAppointment(request):
     time = request.data.get('cancelTime')
     date = request.data.get('cancelDate')
-    if not time or not date:  # Ensure both fields are provided
+    if not time or not date:
         return Response({'error': "Missing cancelTime or cancelDate"}, status=400)
     deleteAppointment = AppointmentDetails.objects.filter(date=date, time=time)
     if deleteAppointment.exists():
