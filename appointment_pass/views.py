@@ -124,7 +124,12 @@ def appointments(request):
 def myAppointments(request):
     if request.method == 'GET':
         username = request.headers.get('UserInfo')
-        appointments = AppointmentDetails.objects.filter(name=username)
+        filter_value = request.GET.get('filter', 'upcoming')
+        today = datetime.now().date()
+        if filter_value == "upcoming":
+            appointments = AppointmentDetails.objects.filter(name=username, date__gte=today)
+        else:
+            appointments = AppointmentDetails.objects.filter(name=username)
         if not appointments.exists():
             return Response({"message": "No Appointments Found!"}, status=404)
         serialized_data = AppointmentDetailsSerializers(appointments, many=True).data
